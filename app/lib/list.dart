@@ -1,46 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'data.dart';
 import 'settings.dart';
+import 'tape.dart';
 import 'base.dart';
 
-class Digitape {
-  final String name;
-  final String description;
-  final ImageProvider? thumbnail;
-
-  Digitape({
-    required this.name,
-    required this.description,
-    required this.thumbnail,
-  });
-}
-
-class DigitapeListProvider {
-  Future<List<Digitape>> readData() async {
-    return [
-      Digitape(
-        name: "Test",
-        description: "Foo",
-        thumbnail: null,
-      ),
-      Digitape(
-        name: "Test2",
-        description: "Foobar",
-        thumbnail: null,
-      )
-    ];
-  }
-}
-
 class Repository {
-  final DigitapeListProvider provider = DigitapeListProvider();
+  final DigitapesLocalProvider localdata = DigitapesLocalProvider();
 
   Future<List<Digitape>> getTapes() async {
-    return await provider.readData();
+    return await localdata.readData();
   }
 
   void addLocalTape(Digitape t) async {
-    return;
+    await localdata.addLocalTape(t.name, t.description);
   }
 }
 
@@ -168,23 +141,26 @@ class CreateTapeForm extends Form {
 
 class DigitapeWidget extends Card {
   final Digitape digitape;
-  DigitapeWidget({super.key, required this.digitape})
+  final Function() onPressed;
+  DigitapeWidget({super.key, required this.digitape, required this.onPressed})
       : super(
-          child: SizedBox(
-              height: 100, //Todo make this a calculated
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  DigiThumbnail(image: digitape.thumbnail),
-                  // small padding
-                  Expanded(
-                    child: DigiDetails(
-                      name: digitape.name,
-                      description: digitape.description,
-                    ),
-                  ),
-                ],
-              )),
+          child: InkWell(
+              onTap: onPressed,
+              child: SizedBox(
+                  height: 100, //Todo make this a calculated
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      DigiThumbnail(image: digitape.thumbnail),
+                      // small padding
+                      Expanded(
+                        child: DigiDetails(
+                          name: digitape.name,
+                          description: digitape.description,
+                        ),
+                      ),
+                    ],
+                  ))),
           margin: const EdgeInsets.all(12),
         );
 }
@@ -218,8 +194,16 @@ class ListPageState extends State<ListPage> {
         child: BlocBuilder<DigitapeCubit, List<Digitape>>(
           builder: (context, state) {
             return ListView(
-                children:
-                    state.map((d) => DigitapeWidget(digitape: d)).toList());
+                children: state
+                    .map((d) => DigitapeWidget(
+                        digitape: d,
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (ctx) => TapePage(tape: d)));
+                        }))
+                    .toList());
           },
         ),
       ),
