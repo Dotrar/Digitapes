@@ -1,0 +1,4 @@
+venv/
+localstorage_store/
+__pycache__/
+.coverage
