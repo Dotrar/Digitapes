@@ -1,5 +1,5 @@
 # Still todo
 
 1. thumbnails
-    a. if not phone, allow open in exlporer
-    b. 
+2. remote connect (to simple-holding-service)
+3. allow uploads via macos / windows / linux
